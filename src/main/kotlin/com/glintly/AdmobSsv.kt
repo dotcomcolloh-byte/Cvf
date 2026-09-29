@@ -38,7 +38,7 @@ object AdmobSsv {
     @Synchronized private fun key(id: Long): PublicKey? {
         val age = now() - fetchedAt
         // keys rotate; cache <= 24h. Unknown key id -> refetch at most once a minute (anti-abuse).
-        if (age > 24 * 3600_000L || (id !in cache && age > 60_000L)) runCatching { refresh() }
+        if (age > 24 * 3600_000L || (!cache.containsKey(id) && age > 60_000L)) runCatching { refresh() }
         return cache[id]
     }
 

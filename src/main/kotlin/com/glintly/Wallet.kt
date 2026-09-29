@@ -27,6 +27,19 @@ fun Transaction.creditUser(uid: UUID, amount: Long, type: String, ref: String): 
     return true
 }
 
+fun Transaction.adSessionsToday(uid: UUID): Int =
+    AdSessions.selectAll().where { (AdSessions.userId eq uid) and (AdSessions.createdAt greaterEq dayStart()) }.count().toInt()
+
+fun Transaction.lastAdSessionAt(uid: UUID): Long? =
+    AdSessions.selectAll().where { AdSessions.userId eq uid }
+        .orderBy(AdSessions.createdAt, SortOrder.DESC).limit(1)
+        .firstOrNull()?.get(AdSessions.createdAt)
+
+fun Transaction.tasksClaimedToday(uid: UUID): Int =
+    TaskClaims.selectAll().where {
+        (TaskClaims.userId eq uid) and (TaskClaims.claimedAt.isNotNull()) and (TaskClaims.claimedAt greaterEq dayStart())
+    }.count().toInt()
+
 suspend fun allowedUser(uid: UUID): Boolean = dbq {
     Users.selectAll().where { (Users.id eq uid) and (Users.banned eq false) }.count() > 0
 }
